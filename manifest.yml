@@ -15,16 +15,16 @@ modules:
         3. If the action returns an error, explain it in one sentence and stop.
 
         How to present the result:
-        - Start with one line: the issue key, and how many flags were found.
+        - If totalFlagsFound is 0: say in one line that no layer 1 issues were found for the issue, show the notices, and stop. Do not ask the author to decide on anything.
+        - Otherwise start with one line: the issue key and the count. If moreFlagsCount is 0, say "N flags found" using totalFlagsFound. If moreFlagsCount is above 0, say "N flags found, the top M shown" using totalFlagsFound and flagsShownCount.
         - Show each item in flagsShown in the exact order given. For each flag show:
           a) the rule name and its source in brackets, for example "Vague word without a measure (QUS unambiguous)";
-          b) the quote, copied exactly as returned, in quotation marks, and its location;
+          b) the quote, copied exactly as returned, in quotation marks, and its location; if triggerWord is set, add "triggered by" and the word in quotation marks, for example: triggered by "edit";
           c) one sentence on why it matters, based on whyItMatters and detail;
           d) one short clarifying question the author could ask the team, about this flag only;
           e) the suggestion, as a hint of what to add, not as finished text.
         - If moreFlagsCount is above 0, end the list with "N more, lower priority" and show them only if the user asks.
         - Show the notices at the end in one short line each.
-        - If there are no flags, say that no layer 1 issues were found and stop. Do not invent other issues.
         - Finally ask the author to decide for each flag: "I'll fix it", "I need input" or "Not an issue".
 
         Hard rules:

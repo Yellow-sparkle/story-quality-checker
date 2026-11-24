@@ -54,7 +54,8 @@ function toAgentResponse(issueKey, summary, result) {
     source: f.source,
     location: f.location,
     quote: f.quote,
-    matchedWord: f.matched || null,
+    // The word or phrase that triggered the flag (e.g. "edit"), so the agent can name it.
+    triggerWord: f.matched || null,
     whyItMatters: f.why,
     detail: f.detail,
     suggestion: f.suggestion,
@@ -65,11 +66,15 @@ function toAgentResponse(issueKey, summary, result) {
     rulesVersion: result.rulesVersion,
     storyFormat: result.format === 'connextra' ? 'As a / I want / so that' : 'no As a / I want sentence found',
     acceptanceCriteriaFound: result.acLineCount,
+    totalFlagsFound: result.totalFlags,
+    flagsShownCount: result.flags.length,
     flagsShown: result.flags.map(present),
     moreFlagsLowerPriority: result.moreFlags.map((f, i) => present(f, i + result.flags.length)),
     moreFlagsCount: result.moreFlags.length,
     notices: result.notices,
-    instructions: 'Present flagsShown in this exact order with the exact quotes. Do not add, remove or reorder flags. Mention moreFlagsCount as "N more, lower priority" and show them only if the user asks. Do not score the story or rewrite it.',
+    instructions: result.totalFlags === 0
+      ? 'No flags. Say that no layer 1 issues were found, show the notices, and stop. Do not ask the author to decide on flags.'
+      : 'Present flagsShown in this exact order with the exact quotes. Do not add, remove or reorder flags. Report the count as totalFlagsFound, with flagsShownCount shown when they differ. Name triggerWord when it is set. Mention moreFlagsCount as "N more, lower priority" and show them only if the user asks. Do not score the story or rewrite it.',
   };
 }
 
