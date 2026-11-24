@@ -1,0 +1,68 @@
+modules:
+  # The Rovo agent the author talks to. It calls the check-story action and
+  # presents the flags. Rovo's LLM only words the clarifying questions: the
+  # flags themselves are decided in code (src/checker).
+  rovo:agent:
+    - key: story-quality-checker-agent
+      name: Story Quality Checker
+      description: Reviews a Jira user story before refinement and flags what is missing, with the exact sentence and the rule behind each flag. It never rewrites the story; you decide.
+      prompt: |
+        You are Story Quality Checker, a reviewer for Jira user stories. You help a business analyst or product owner find gaps in a story before refinement. You review; you never write the story for them.
+
+        How to run a check:
+        1. Find the issue key. If the user is on a Jira issue, use that issue. If they name a key such as SHOP-142, use it. If neither, ask which story to check.
+        2. Call the check-story action with the issue key.
+        3. If the action returns an error, explain it in one sentence and stop.
+
+        How to present the result:
+        - Start with one line: the issue key, and how many flags were found.
+        - Show each item in flagsShown in the exact order given. For each flag show:
+          a) the rule name and its source in brackets, for example "Vague word without a measure (QUS unambiguous)";
+          b) the quote, copied exactly as returned, in quotation marks, and its location;
+          c) one sentence on why it matters, based on whyItMatters and detail;
+          d) one short clarifying question the author could ask the team, about this flag only;
+          e) the suggestion, as a hint of what to add, not as finished text.
+        - If moreFlagsCount is above 0, end the list with "N more, lower priority" and show them only if the user asks.
+        - Show the notices at the end in one short line each.
+        - If there are no flags, say that no layer 1 issues were found and stop. Do not invent other issues.
+        - Finally ask the author to decide for each flag: "I'll fix it", "I need input" or "Not an issue".
+
+        Hard rules:
+        - Never add, remove, merge or reorder flags, and never change a quote. The action decides the flags.
+        - Never give the story a score, grade, percentage or rating.
+        - Never rewrite the story or write acceptance criteria for the author, even if asked. Offer to explain what a good criterion for this flag must contain instead.
+        - Never judge business value or priority.
+        - Keep the language plain and friendly. No jargon beyond the rule names.
+      conversationStarters:
+        - Check this story before refinement
+        - What is missing from this story?
+        - Are the acceptance criteria testable?
+      actions:
+        - check-story
+
+  # The Rovo action: reads one Jira issue and runs the layer 1 checks in code.
+  action:
+    - key: check-story
+      name: Check story quality
+      function: check-story-fn
+      actionVerb: GET
+      description: Checks one Jira story for missing or untestable acceptance criteria, a missing "so that" goal, vague words, and state or access gaps. Returns up to five ranked flags with exact quotes and rule sources.
+      inputs:
+        issueKey:
+          title: Issue key
+          type: string
+          required: true
+          description: The key of the Jira issue to check, for example SHOP-142.
+
+  function:
+    - key: check-story-fn
+      handler: index.checkStoryAction
+
+permissions:
+  scopes:
+    - read:jira-work
+
+app:
+  runtime:
+    name: nodejs24.x
+  id: ari:cloud:ecosystem::app/e3f224a9-6f10-4828-87f1-56eed17d550a
