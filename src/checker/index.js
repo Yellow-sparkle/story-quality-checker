@@ -33,7 +33,7 @@ export function normalise(text) {
 /**
  * Run all layer 1 checks on a story.
  * @param {object} input { summary, description, acceptanceCriteria } as plain text.
- * @param {object} [options] { accessCoverage: boolean, maxShown: number }
+ * @param {object} [options] { maxShown: number }
  * @returns {object} Check result.
  */
 export function checkStory(input, options = {}) {
@@ -44,7 +44,7 @@ export function checkStory(input, options = {}) {
     ...checkAcMissing(parsed),
     ...checkAcUntestable(parsed),
     ...checkGoalMissing(parsed),
-    ...checkEdgeAccess(parsed, options),
+    ...checkEdgeAccess(parsed),
     ...checkEdgeState(parsed),
     ...checkVagueWords(parsed),
   ];

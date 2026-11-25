@@ -202,20 +202,51 @@ export function checkEdgeState(parsed) {
 // ---------------------------------------------------------------------------
 // EDGE-ACCESS (own rule): an access word in the "I want" clause (never the
 // "As a [role]" opening), and the AC don't say who can't.
-// The optional coverage check (open decision #4) is off by default; pass
-// { accessCoverage: true } to try it.
+//
+// Coverage check (decided 25 Nov, call 3A): the flag stays silent when one AC
+// line names the story's own role, a restriction word (only, cannot, can't,
+// never) and the access verb from the "I want" clause. Role words come from the
+// story itself, never from a fixed list, so the rule is not tuned to one story.
+// Known false alarm kept on purpose: "only" used as a filter (SQC-05).
 // ---------------------------------------------------------------------------
-export function checkEdgeAccess(parsed, options = {}) {
+
+// Access words that are verbs. Matched by stem so "Delete", "deleted" and
+// "deleting" all count as the verb "delete".
+const ACCESS_VERB_STEMS = { approve: 'approv', edit: 'edit', delete: 'delet', view: 'view', access: 'access' };
+const RESTRICTION = /\b(only|cannot|can['\u2019]t|never)\b/i;
+const ROLE_STOPWORDS = new Set(['the', 'and', 'for', 'with', 'from', 'that', 'this', 'user', 'person', 'someone']);
+
+/** Content words of the role in "As a [role]", e.g. "camp administrator" -> camp, administrator. */
+function roleWords(role) {
+  return String(role || '')
+    .toLowerCase()
+    .split(/[^a-z\u00c0-\u024f]+/)
+    .filter((w) => w.length > 3 && !ROLE_STOPWORDS.has(w));
+}
+
+/** True when some AC line already says who can or cannot do the action. */
+export function acCoverAccess(parsed) {
+  const roles = roleWords(parsed.story && parsed.story.role);
+  if (roles.length === 0) return false;
+  const verbs = allMatches(accessRes, parsed.story.iWant)
+    .map((m) => ACCESS_VERB_STEMS[m.word.toLowerCase()])
+    .filter(Boolean);
+  return parsed.acLines.some((ac) => {
+    const t = ac.text.toLowerCase();
+    if (!RESTRICTION.test(t)) return false;
+    // Role word, with or without a plural "s" ("moderator", "moderators").
+    if (!roles.some((r) => new RegExp(`\\b${escapeRe(r)}s?\\b`).test(t))) return false;
+    // If the "I want" clause has an access verb, the same AC line must name it.
+    if (verbs.length > 0 && !verbs.some((v) => new RegExp(`\\b${v}`).test(t))) return false;
+    return true;
+  });
+}
+
+export function checkEdgeAccess(parsed) {
   if (!parsed.story || !parsed.story.iWant) return [];
   const hit = firstMatch(accessRes, parsed.story.iWant);
   if (!hit) return [];
-
-  if (options.accessCoverage) {
-    const acText = parsed.acLines.map((a) => a.text).join('\n');
-    if (/\b(only|cannot|can['\u2019]t|not\s+allowed|never\s+(?:see|sees)|no\s+access|is\s+not\s+shown|are\s+not\s+shown|does\s+not\s+see|do\s+not\s+see)\b/i.test(acText)) {
-      return [];
-    }
-  }
+  if (acCoverAccess(parsed)) return [];
 
   return [{
     rule: 'EDGE-ACCESS',

@@ -6,16 +6,18 @@ A Rovo agent for Jira, built on Atlassian Forge, that reviews a user story befor
 
 Built for Atlassian Codegeist 2026, category Apps for Software Teams.
 
-## What version 0.1 does (layer 1)
+## What it checks (layer 1, rules 0.2.0)
 
 | Rule | Fires when | Source |
 | --- | --- | --- |
 | AC-MISSING | The story has no acceptance criteria (no AC field, no "Acceptance criteria" section, no Given/When/Then lines). | INVEST "Testable" |
-| AC-UNTESTABLE | An AC line has no observable outcome, such as "works as expected" or "handled properly". | INVEST "Testable" |
+| AC-UNTESTABLE | An AC line contains a phrase from a fixed list with no observable outcome, such as "works as expected", "handled properly" or "looks good". | INVEST "Testable" |
 | GOAL-MISSING | There is no "so that ..." clause. | QUS "well-formed"; Connextra template |
-| EDGE-ACCESS | An access word (only, admin, approve, edit, delete, view, access, cannot, can't, permission, restricted) is in the "I want" clause. | Own rule |
+| EDGE-ACCESS | An access word (only, admin, approve, edit, delete, view, access, cannot, can't, permission, restricted) is in the "I want" clause, and no AC line names the story's role, a restriction word (only, cannot, can't, never) and the access verb together. | Own rule |
 | EDGE-STATE | A state word (cancel, approve, enrol, publish, complete, ...) is in the "I want" clause, and the AC mention neither the reverse step nor items already in progress. | Own rule |
-| VAGUE-WORD | A listed vague word (fast, easy, intuitive, flexible, ...) is in the "I want" clause or an AC line, with no number and unit in the same clause. | QUS "unambiguous" |
+| VAGUE-WORD | A listed vague word (fast, easy, intuitive, flexible, ...) is in the "I want" clause or an AC line, with no number and unit in the same clause. Numbers elsewhere in the AC do not cancel it. | QUS "unambiguous" |
+
+Words in the "so that" clause are not checked, because that clause states the benefit, which is not built or tested.
 
 Every rule is decided in code, so the same story gets the same flags in the same order on every run. Flags are ranked in a fixed order (AC-MISSING, AC-UNTESTABLE, GOAL-MISSING, EDGE-ACCESS, EDGE-STATE, VAGUE-WORD) and capped at five; the rest fold under "N more, lower priority". There is no score, grade or story generation.
 
@@ -62,7 +64,7 @@ node scripts/run-golden-set.js "path/to/golden-set.csv" --split dev --runs 3 --o
 
 - Team Definition of Ready from a Confluence page and the parent epic (layer 2, week 2).
 - The "post clarifying questions" action with edit and confirm (week 2).
-- AC-UNTESTABLE judged by an LLM with a quote check. Version 0.1 uses a fixed phrase list instead, until that decision is made.
+- AC-UNTESTABLE stays a fixed phrase list for the hackathon (decided 25 Nov), so it is stable across runs and needs no LLM credits.
 
 ## Credits and sources
 

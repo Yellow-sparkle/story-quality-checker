@@ -56,14 +56,13 @@ function main() {
   const valueOptions = new Set(['--split', '--runs', '--out']);
   const file = args.find((a, i) => !a.startsWith('--') && !valueOptions.has(args[i - 1]));
   if (!file) {
-    console.error('Usage: node scripts/run-golden-set.js <golden-set.csv> [--split dev] [--runs 3] [--out results.csv] [--access-coverage]');
+    console.error('Usage: node scripts/run-golden-set.js <golden-set.csv> [--split dev] [--runs 3] [--out results.csv]');
     process.exit(1);
   }
   const opt = (name, dflt) => { const i = args.indexOf(`--${name}`); return i >= 0 ? args[i + 1] : dflt; };
   const split = opt('split', 'dev');
   const runs = Number(opt('runs', '3'));
   const out = opt('out', null);
-  const accessCoverage = args.includes('--access-coverage');
 
   if (split === 'sealed' && !args.includes('--allow-sealed')) {
     console.error('Refusing to run the sealed split. Sealed stories are not run before 14 Dec (PRD F6.6). Pass --allow-sealed on the agreed date.');
@@ -79,7 +78,7 @@ function main() {
     const signatures = [];
     let result = null;
     for (let n = 0; n < runs; n += 1) {
-      result = checkStory(input, { accessCoverage });
+      result = checkStory(input);
       const all = [...result.flags, ...result.moreFlags];
       signatures.push(JSON.stringify(all.map((f) => [f.rule, f.quote, f.matched || ''])));
     }

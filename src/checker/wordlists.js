@@ -9,9 +9,13 @@
  */
 
 // Version of the rules. Logged with every check so eval runs can be compared.
-export const RULES_VERSION = '0.1.0';
+export const RULES_VERSION = '0.2.0';
 
 // VAGUE-WORD list (draft, to confirm). Matched as whole words / phrases.
+// Scope (decided 25 Nov, calls 1A and 2A): words in the "so that" clause are not
+// checked, because that clause states the benefit, which is not built or tested.
+// A vague word stays silent only when its own clause has a number and a unit;
+// numbers elsewhere in the acceptance criteria do not cancel it.
 export const VAGUE_WORDS = [
   'fast', 'faster', 'quick', 'quickly', 'easy', 'easily', 'simple',
   'user-friendly', 'intuitive', 'flexible', 'great', 'nice', 'smooth',
@@ -96,6 +100,9 @@ export const UNTESTABLE_PHRASES = [
   'works correctly', 'work correctly', 'works properly', 'work properly',
   'works fine', 'works well', 'without any issues', 'without issues',
   'without problems', 'is handled', 'are handled', 'properly', 'correctly',
+  // Added 25 Nov (call 4A).
+  // "etc." added after checking it raises no flag on any of the 28 dev stories.
+  'looks good', 'look good', 'etc.', 'etc',
 ];
 
 // Fixed priority order for ranking (draft, decided 22 Nov; review after the dev run).
@@ -153,6 +160,6 @@ export const RULES = {
     name: 'Vague word without a measure',
     source: 'QUS "unambiguous" (Lucassen et al., 2016)',
     why: 'Words like this mean different things to different readers, and there is no number and unit to test against.',
-    suggestion: 'Replace the word with a measurable target (a number and a unit), or say what it means for this story.',
+    suggestion: 'Replace the word with a measurable target (a number and a unit). If your acceptance criteria already define it, confirm that and dismiss this flag, or move the measure up into the story.',
   },
 };

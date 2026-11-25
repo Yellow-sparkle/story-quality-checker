@@ -188,3 +188,35 @@ test('summary line uses the right count and grammar', async () => {
   assert.equal(countLine('SQCT-2', 2, 2), 'SQCT-2: 2 flags found.');
   assert.equal(countLine('SQCT-7', 8, 5), 'SQCT-7: 8 flags found, the top 5 shown.');
 });
+
+test('EDGE-ACCESS is silent when an AC line names the role, a restriction and the verb', () => {
+  const covered = checkStory({
+    description: 'As a PaceMate coach, I want to delete a training plan, so that athletes stop seeing it.\nAcceptance criteria:\n- Only the coach who created the plan sees Delete. Athletes never see it.\n- Delete removes the plan from every athlete within 1 minute.',
+  });
+  assert.ok(!rules(covered).includes('EDGE-ACCESS'));
+
+  // "cannot" about timing, with no role in the line, does not answer who can't.
+  const timing = checkStory({
+    description: 'As a PaceMate coach, I want to delete a training plan, so that athletes stop seeing it.\nAcceptance criteria:\n- A plan that is in use this week cannot be deleted until Sunday.',
+  });
+  assert.ok(rules(timing).includes('EDGE-ACCESS'));
+
+  // Role and restriction without the access verb do not count either.
+  const noVerb = checkStory({
+    description: 'As a Kestrel Bank manager, I want to approve card limit increases, so that large limits get checked.\nAcceptance criteria:\n- Only managers see the Limits queue.',
+  });
+  assert.ok(rules(noVerb).includes('EDGE-ACCESS'));
+});
+
+test('"looks good" and "etc." are untestable AC phrases', () => {
+  const result = checkStory({
+    description: 'As a Lumen Home shopper, I want to print my receipt, so that I can return items.\nAcceptance criteria:\n- The receipt looks good on paper.\n- It shows items, prices, VAT etc.',
+  });
+  assert.equal(result.flags.filter((f) => f.rule === 'AC-UNTESTABLE').length, 2);
+});
+
+test('VAGUE-WORD suggestion offers to confirm and dismiss when the AC define the word', () => {
+  const result = checkStory({ description: 'As a PaceMate user, I want a fast way to log a workout, so that I keep my streak.\nAcceptance criteria:\n- Logging takes at most 2 taps.' });
+  const v = result.flags.find((f) => f.rule === 'VAGUE-WORD');
+  assert.match(v.suggestion, /confirm that and dismiss this flag/);
+});
