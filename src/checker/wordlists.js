@@ -9,7 +9,7 @@
  */
 
 // Version of the rules. Logged with every check so eval runs can be compared.
-export const RULES_VERSION = '0.2.0';
+export const RULES_VERSION = '0.3.0';
 
 // VAGUE-WORD list (draft, to confirm). Matched as whole words / phrases.
 // Scope (decided 25 Nov, calls 1A and 2A): words in the "so that" clause are not

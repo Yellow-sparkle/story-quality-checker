@@ -67,7 +67,7 @@ export function checkStory(input, options = {}) {
       ruleName: RULES[f.rule].name,
       source: RULES[f.rule].source,
       why: RULES[f.rule].why,
-      suggestion: RULES[f.rule].suggestion,
+      suggestion: f.suggestion || RULES[f.rule].suggestion,
       decidedBy: 'code',
     }))
     .sort((a, b) => PRIORITY.indexOf(a.rule) - PRIORITY.indexOf(b.rule));

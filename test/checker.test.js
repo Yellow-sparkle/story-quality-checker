@@ -220,3 +220,52 @@ test('VAGUE-WORD suggestion offers to confirm and dismiss when the AC define the
   const v = result.flags.find((f) => f.rule === 'VAGUE-WORD');
   assert.match(v.suggestion, /confirm that and dismiss this flag/);
 });
+
+// EDGE-STATE group sub-check (decided 25 Nov, file 11).
+test('EDGE-STATE asks which states fall under neither filter for a "Not ..." option', () => {
+  const input = {
+    description: 'As a returning Lumen Home shopper, I want to filter my orders by delivery state, so that I can find an order that has not arrived.\nAcceptance criteria:\n1. Given I have orders in more than one delivery state, When I choose \'Not delivered\' in the filter, Then only orders in Processing, Shipped or Out for delivery are listed, newest first.\n2. Given I choose \'Delivered\', Then only delivered orders are listed.',
+  };
+  const result = checkStory(input);
+  const state = result.flags.filter((f) => f.rule === 'EDGE-STATE');
+  assert.equal(state.length, 1);
+  assert.equal(state[0].location, 'AC line 1');
+  assert.equal(state[0].matched, 'Not delivered');
+  assert.match(state[0].detail, /Processing, Shipped or Out for delivery/);
+  assert.match(state[0].suggestion, /neither filter/);
+  assert.ok(input.description.includes(state[0].quote));
+  // Same flags on every run.
+  assert.equal(JSON.stringify(checkStory(input)), JSON.stringify(result));
+});
+
+test('EDGE-STATE group sub-check fires on "Other" and "All except" without a state word in "I want"', () => {
+  const other = checkStory({
+    description: 'As a Kestrel Bank customer, I want to sort my payments into groups, so that I see where money goes.\nAcceptance criteria:\n- When I pick "Other", Then only Refunded, Disputed and Held payments are shown.',
+  });
+  assert.deepEqual(rules(other), ['EDGE-STATE']);
+
+  const except = checkStory({
+    description: 'As a PaceMate coach, I want to see my athletes in one list, so that I plan the week.\nAcceptance criteria:\n- Choosing ‘All except injured’ shows only Active, Resting or Travelling athletes.',
+  });
+  assert.deepEqual(rules(except), ['EDGE-STATE']);
+});
+
+test('EDGE-STATE group sub-check stays silent on a named option with a complete list', () => {
+  // Clean near-miss from the debate: "Express" is not a complement name.
+  const express = checkStory({
+    description: 'As a Lumen Home shopper, I want to choose a delivery speed, so that my lamp arrives when I am home.\nAcceptance criteria:\n- Given I am at checkout, When I choose \'Express\', Then only Next-day or Same-day options are listed.',
+  });
+  assert.ok(!rules(express).includes('EDGE-STATE'));
+
+  // Real parent states are left out on purpose.
+  const open = checkStory({
+    description: 'As a Kestrel Bank customer, I want to see my support requests, so that I can follow up.\nAcceptance criteria:\n- When I choose \'Open\', Then only New, Assigned or Waiting requests are listed.\n- When I choose \'Under review\', Then only Assigned or Waiting requests are listed.',
+  });
+  assert.ok(!rules(open).includes('EDGE-STATE'));
+
+  // A complement name with no "only" list does not fire either.
+  const noList = checkStory({
+    description: 'As a Lumen Home shopper, I want to filter my orders, so that I find one quickly.\nAcceptance criteria:\n- The filter has the options \'Delivered\' and \'Not delivered\'.',
+  });
+  assert.ok(!rules(noList).includes('EDGE-STATE'));
+});

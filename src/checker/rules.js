@@ -175,6 +175,11 @@ export function checkVagueWords(parsed) {
 // neither the reverse step nor records already in flight.
 // ---------------------------------------------------------------------------
 export function checkEdgeState(parsed) {
+  // Group sub-check first (decided 25 Nov, file 11): it reads the AC lines only,
+  // so it also runs when the "I want" clause has no state word.
+  const group = findGroupGap(parsed);
+  if (group) return [group];
+
   if (!parsed.story || !parsed.story.iWant) return []; // skip rather than guess (J4)
   const hits = allMatches(stateRes, parsed.story.iWant);
   if (hits.length === 0) return [];
@@ -197,6 +202,51 @@ export function checkEdgeState(parsed) {
     }];
   }
   return [];
+}
+
+// ---------------------------------------------------------------------------
+// EDGE-STATE group sub-check (decided 25 Nov, file 11, SQC-31).
+//
+// An AC line names a filter option in quotes whose name is a complement
+// ("Not delivered", "Non-urgent", "Unpaid", "Other", "All except refunds",
+// "Everything but drafts"), and then says "only" followed by a list of states.
+// A complement is right only if it covers everything else, and code cannot tell
+// whether the list is complete, so the flag asks which states fall under
+// neither filter. Real parent states ("Open", "Active", "In progress",
+// "Pending") are left out on purpose: they usually have a complete list, and
+// including them would put questions on clean stories. A name that is not on
+// the list, such as "Express", never fires.
+// ---------------------------------------------------------------------------
+
+// Quoted option name: straight or curly, single or double quotes.
+const QUOTED_OPTION = /(?:"|“|'|‘)([^"'“”‘’]{1,40})(?:"|”|'|’)/g;
+// Complement names. "Un..." excludes common words that are not negations
+// (under, unit, union, unique, universal, until).
+const GROUP_NAME = /^(?:not\s+\S|non[-\s]?\S|un(?!der|it|ion|ique|iver|til)[a-z]|other\b|all\s+except\b|everything\s+(?:but|except)\b)/i;
+// "only" followed by a list: at least two items joined by a comma, "or" or "and".
+const ONLY_LIST = /\bonly\s+([^.;]*?(?:,|\s+or\s+|\s+and\s+)[^.;]*?)(?=\s+(?:are|is|appear|appears|show|shows|shown|listed|remain|remains)\b|[.;]|$)/i;
+
+export function findGroupGap(parsed) {
+  for (const ac of parsed.acLines) {
+    QUOTED_OPTION.lastIndex = 0;
+    let m;
+    while ((m = QUOTED_OPTION.exec(ac.text)) !== null) {
+      const name = m[1].trim();
+      if (!GROUP_NAME.test(name)) continue;
+      const after = ac.text.slice(m.index + m[0].length);
+      const list = ONLY_LIST.exec(after);
+      if (!list) continue;
+      return {
+        rule: 'EDGE-STATE',
+        quote: ac.text,
+        location: `AC line ${ac.n}`,
+        matched: name,
+        detail: `AC line ${ac.n} defines "${name}" as only ${list[1].trim()}. Any state not in that list and not in the other filters belongs to neither filter, so those items disappear from every list.`,
+        suggestion: `List every state "${name}" includes, or say which states belong to neither filter (for example cancelled, returned or failed items) and where they appear.`,
+      };
+    }
+  }
+  return null;
 }
 
 // ---------------------------------------------------------------------------
