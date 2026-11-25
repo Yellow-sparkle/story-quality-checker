@@ -269,3 +269,20 @@ test('EDGE-STATE group sub-check stays silent on a named option with a complete 
   });
   assert.ok(!rules(noList).includes('EDGE-STATE'));
 });
+
+// Rules 0.4.0 (Kate's decisions, 26 Nov).
+test('"enrolled", "enroll" and "completed" no longer trigger EDGE-STATE', () => {
+  for (const iWant of ['update the details of enrolled members', 'enroll my child in a PaceMate kids class', 'change my booking as long as the class has not been completed']) {
+    const result = checkStory({ description: `As a PaceMate member, I want to ${iWant}, so that my plans stay right.\nAcceptance criteria:\n- Saving shows "Saved" and the new value.` });
+    assert.ok(!rules(result).includes('EDGE-STATE'), iWant);
+  }
+});
+
+test('"properly" and "correctly" are vague words as well as untestable phrases', () => {
+  const result = checkStory({
+    description: 'As a Lumen Home shopper, I want to edit my address, so that parcels arrive.\nAcceptance criteria:\n- Saving shows "Address saved".\n- Invalid postcodes are handled properly.',
+  });
+  assert.ok(rules(result).includes('AC-UNTESTABLE'));
+  const vague = result.flags.find((f) => f.rule === 'VAGUE-WORD');
+  assert.equal(vague.matched, 'properly');
+});

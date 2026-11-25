@@ -9,7 +9,7 @@
  */
 
 // Version of the rules. Logged with every check so eval runs can be compared.
-export const RULES_VERSION = '0.3.0';
+export const RULES_VERSION = '0.4.0';
 
 // VAGUE-WORD list (draft, to confirm). Matched as whole words / phrases.
 // Scope (decided 25 Nov, calls 1A and 2A): words in the "so that" clause are not
@@ -21,15 +21,20 @@ export const VAGUE_WORDS = [
   'user-friendly', 'intuitive', 'flexible', 'great', 'nice', 'smooth',
   'seamless', 'sensible', 'efficient', 'efficiently', 'appropriate',
   'appropriately', 'robust', 'modern', 'as needed',
+  // Added 26 Nov (Kate's decision, rules 0.4.0). 'appropriately' was already listed.
+  'properly', 'correctly',
 ];
 
 // EDGE-STATE trigger words (draft, to confirm). Read in the "I want" clause only.
 export const STATE_WORDS = [
   'status', 'state', 'pending', 'active', 'inactive', 'suspend', 'suspended',
-  'cancel', 'cancelled', 'canceled', 'archive', 'archived', 'enrol', 'enroll',
-  'enrolled', 'admitted', 'approve', 'reject', 'rejected', 'publish',
-  'published', 'public', 'hidden', 'hide', 'complete', 'completed', 'expire',
+  'cancel', 'cancelled', 'canceled', 'archive', 'archived',
+  'admitted', 'approve', 'reject', 'rejected', 'publish',
+  'published', 'public', 'hidden', 'hide', 'complete', 'expire',
   'expired', 'reopen', 'draft',
+  // Removed 26 Nov (Kate's decision, rules 0.4.0): 'enrolled' ("enrolled campers",
+  // SQC-20) names a group; 'enrol'/'enroll' (SQC-23) and 'completed' ("as long as
+  // the draw has not been completed", SQC-24) are not state changes the story makes.
   // 'freeze' is not on the draft list yet. Left out on purpose: Kate owns the list.
 ];
 
@@ -66,9 +71,6 @@ export const STATE_REVERSE_WORDS = {
   suspended: ['reactivate', 'reactivated', 'resume', 'resumed', 'unsuspend', 'reinstate'],
   archive: ['restore', 'restored', 'unarchive', 'unarchived'],
   archived: ['restore', 'restored', 'unarchive', 'unarchived'],
-  enrol: ['withdraw', 'withdrawn', 'unenrol', 'unenroll', 'cancel', 'cancelled', 'canceled'],
-  enroll: ['withdraw', 'withdrawn', 'unenrol', 'unenroll', 'cancel', 'cancelled', 'canceled'],
-  enrolled: ['withdraw', 'withdrawn', 'unenrol', 'unenroll', 'cancel', 'cancelled', 'canceled'],
   admitted: ['withdraw', 'withdrawn', 'cancel', 'cancelled', 'canceled', 'refuse', 'refused'],
   publish: ['unpublish', 'unpublished', 'hide', 'hidden', 'withdraw', 'withdrawn'],
   published: ['unpublish', 'unpublished', 'hide', 'hidden', 'withdraw', 'withdrawn'],
@@ -76,7 +78,6 @@ export const STATE_REVERSE_WORDS = {
   hide: ['unhide', 'show', 'restore', 'restored'],
   hidden: ['unhide', 'show', 'restore', 'restored'],
   complete: ['reopen', 'reopened', 'incomplete'],
-  completed: ['reopen', 'reopened', 'incomplete'],
   expire: ['renew', 'renewed', 'extend', 'extended', 'reactivate'],
   expired: ['renew', 'renewed', 'extend', 'extended', 'reactivate'],
   reopen: ['close', 'closed'],

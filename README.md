@@ -6,7 +6,7 @@ A Rovo agent for Jira, built on Atlassian Forge, that reviews a user story befor
 
 Built for Atlassian Codegeist 2026, category Apps for Software Teams.
 
-## What it checks (layer 1, rules 0.3.0)
+## What it checks (layer 1, rules 0.4.0)
 
 | Rule | Fires when | Source |
 | --- | --- | --- |
@@ -14,8 +14,8 @@ Built for Atlassian Codegeist 2026, category Apps for Software Teams.
 | AC-UNTESTABLE | An AC line contains a phrase from a fixed list with no observable outcome, such as "works as expected", "handled properly" or "looks good". | INVEST "Testable" |
 | GOAL-MISSING | There is no "so that ..." clause. | QUS "well-formed"; Connextra template |
 | EDGE-ACCESS | An access word (only, admin, approve, edit, delete, view, access, cannot, can't, permission, restricted) is in the "I want" clause, and no AC line names the story's role, a restriction word (only, cannot, can't, never) and the access verb together. | Own rule |
-| EDGE-STATE | A state word (cancel, approve, enrol, publish, complete, ...) is in the "I want" clause, and the AC mention neither the reverse step nor items already in progress. Also fires when an AC line defines a quoted "Not ...", "Non-...", "Un...", "Other", "All except" or "Everything but" option as "only" a list of states, and asks which states belong to neither filter. | Own rule |
-| VAGUE-WORD | A listed vague word (fast, easy, intuitive, flexible, ...) is in the "I want" clause or an AC line, with no number and unit in the same clause. Numbers elsewhere in the AC do not cancel it. | QUS "unambiguous" |
+| EDGE-STATE | A state word (cancel, approve, publish, complete, ...) is in the "I want" clause, and the AC mention neither the reverse step nor items already in progress. Also fires when an AC line defines a quoted "Not ...", "Non-...", "Un...", "Other", "All except" or "Everything but" option as "only" a list of states, and asks which states belong to neither filter. | Own rule |
+| VAGUE-WORD | A listed vague word (fast, easy, intuitive, flexible, properly, correctly, ...) is in the "I want" clause or an AC line, with no number and unit in the same clause. Numbers elsewhere in the AC do not cancel it. | QUS "unambiguous" |
 
 Words in the "so that" clause are not checked, because that clause states the benefit, which is not built or tested.
 
