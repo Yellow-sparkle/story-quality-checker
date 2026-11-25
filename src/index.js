@@ -45,6 +45,17 @@ function acceptanceCriteriaText(issue) {
   return parts.join('\n');
 }
 
+/**
+ * The first line of the agent's reply, built in code so the count and its
+ * grammar never vary: "1 flag found", "3 flags found", "8 flags found, the top 5 shown".
+ */
+export function countLine(issueKey, total, shown) {
+  if (total === 0) return `No layer 1 issues were found for ${issueKey}.`;
+  const noun = total === 1 ? 'flag' : 'flags';
+  const tail = shown < total ? `, the top ${shown} shown` : '';
+  return `${issueKey}: ${total} ${noun} found${tail}.`;
+}
+
 /** Turn the check result into a compact object the agent can present. */
 function toAgentResponse(issueKey, summary, result) {
   const present = (f, i) => ({
@@ -66,6 +77,7 @@ function toAgentResponse(issueKey, summary, result) {
     rulesVersion: result.rulesVersion,
     storyFormat: result.format === 'connextra' ? 'As a / I want / so that' : 'no As a / I want sentence found',
     acceptanceCriteriaFound: result.acLineCount,
+    summaryLine: countLine(issueKey, result.totalFlags, result.flags.length),
     totalFlagsFound: result.totalFlags,
     flagsShownCount: result.flags.length,
     flagsShown: result.flags.map(present),
@@ -74,7 +86,7 @@ function toAgentResponse(issueKey, summary, result) {
     notices: result.notices,
     instructions: result.totalFlags === 0
       ? 'No flags. Say that no layer 1 issues were found, show the notices, and stop. Do not ask the author to decide on flags.'
-      : 'Present flagsShown in this exact order with the exact quotes. Do not add, remove or reorder flags. Report the count as totalFlagsFound, with flagsShownCount shown when they differ. Name triggerWord when it is set. Mention moreFlagsCount as "N more, lower priority" and show them only if the user asks. Do not score the story or rewrite it.',
+      : 'Present flagsShown in this exact order with the exact quotes. Do not add, remove or reorder flags. Start with summaryLine, copied exactly. Name triggerWord when it is set. Mention moreFlagsCount as "N more, lower priority" and show them only if the user asks. Do not score the story or rewrite it.',
   };
 }
 

@@ -180,3 +180,11 @@ test('no score, grade or percentage in the result', () => {
   const json = JSON.stringify(checkStory(GOOD));
   assert.ok(!/score|grade|percent/i.test(json));
 });
+
+test('summary line uses the right count and grammar', async () => {
+  const { countLine } = await import('../src/index.js');
+  assert.equal(countLine('SQCT-1', 0, 0), 'No layer 1 issues were found for SQCT-1.');
+  assert.equal(countLine('SQCT-3', 1, 1), 'SQCT-3: 1 flag found.');
+  assert.equal(countLine('SQCT-2', 2, 2), 'SQCT-2: 2 flags found.');
+  assert.equal(countLine('SQCT-7', 8, 5), 'SQCT-7: 8 flags found, the top 5 shown.');
+});
