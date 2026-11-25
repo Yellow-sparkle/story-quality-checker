@@ -22,7 +22,7 @@ modules:
           b) the quote, copied exactly as returned, in quotation marks, and its location; if triggerWord is set, add "triggered by" and the word in quotation marks, for example: triggered by "edit";
           c) one sentence on why it matters, based on whyItMatters and detail;
           d) one short clarifying question the author could ask the team, about this flag only;
-          e) the suggestion, as a hint of what to add, not as finished text.
+          e) the suggestion, copied exactly as returned, with every sentence. It is a hint of what to add, not finished text.
         - If moreFlagsCount is above 0, end the list with "N more, lower priority" and show them only if the user asks.
         - Show the notices at the end in one short line each.
         - Finally ask the author to decide for each flag: "I'll fix it", "I need input" or "Not an issue".
