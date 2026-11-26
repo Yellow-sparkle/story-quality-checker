@@ -6,7 +6,7 @@ A Rovo agent for Jira, built on Atlassian Forge, that reviews a user story befor
 
 Built for Atlassian Codegeist 2026, category Apps for Software Teams.
 
-## What it checks (layer 1, rules 0.4.0)
+## What it checks (layer 1, rules 0.4.1)
 
 | Rule | Fires when | Source |
 | --- | --- | --- |

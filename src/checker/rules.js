@@ -226,6 +226,11 @@ const GROUP_NAME = /^(?:not\s+\S|non[-\s]?\S|un(?!der|it|ion|ique|iver|til)[a-z]
 // "only" followed by a list: at least two items joined by a comma, "or" or "and".
 const ONLY_LIST = /\bonly\s+([^.;]*?(?:,|\s+or\s+|\s+and\s+)[^.;]*?)(?=\s+(?:are|is|appear|appears|show|shows|shown|listed|remain|remains)\b|[.;]|$)/i;
 
+// Exclusion names: the option is "everything except the values I pick".
+const EXCLUDE_NAME = /^(?:all\s+except\b|everything\s+(?:but|except)\b)/i;
+// "except", "but" or "excluding" followed by the left-out values (one or more).
+const EXCEPT_LIST = /\b(?:except|but|excluding)\s+([^.;]+?)(?=\s+(?:are|is|appear|appears|show|shows|shown|listed|remain|remains)\b|[.;]|$)/i;
+
 export function findGroupGap(parsed) {
   for (const ac of parsed.acLines) {
     QUOTED_OPTION.lastIndex = 0;
@@ -235,7 +240,22 @@ export function findGroupGap(parsed) {
       if (!GROUP_NAME.test(name)) continue;
       const after = ac.text.slice(m.index + m[0].length);
       const list = ONLY_LIST.exec(after);
-      if (!list) continue;
+      if (!list) {
+        // Exclusion form: the option leaves out picked values ("All except",
+        // "Everything but"), and the line then says "except" or "but" and a list.
+        // The gap is values the filter list does not show: are they in or out?
+        if (!EXCLUDE_NAME.test(name)) continue;
+        const ex = EXCEPT_LIST.exec(after);
+        if (!ex) continue;
+        return {
+          rule: 'EDGE-STATE',
+          quote: ac.text,
+          location: `AC line ${ac.n}`,
+          matched: name,
+          detail: `AC line ${ac.n} defines "${name}" as everything except ${ex[1].trim()}. It does not say whether values the filter does not list are included, so those items may show up or disappear without anyone deciding.`,
+          suggestion: `Say whether "${name}" also includes values that are not in the filter list, and list every value it can return.`,
+        };
+      }
       return {
         rule: 'EDGE-STATE',
         quote: ac.text,

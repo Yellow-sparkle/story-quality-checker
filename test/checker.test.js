@@ -286,3 +286,28 @@ test('"properly" and "correctly" are vague words as well as untestable phrases',
   const vague = result.flags.find((f) => f.rule === 'VAGUE-WORD');
   assert.equal(vague.matched, 'properly');
 });
+
+// Rules 0.4.1 (26 Nov): exclusion form of the group sub-check (SQC-54 miss).
+test('EDGE-STATE group sub-check fires on an "All except" option defined by "except" a list', () => {
+  const cars = checkStory({
+    description: 'As a dealer, I want to filter cars by colour, so that I can find them.\nAcceptance criteria:\n- The filter lists Red, Blue, Green and Black.\n- When I choose "All except" and pick Blue and Green, I see all cars except Blue and Green.',
+  });
+  assert.deepEqual(rules(cars), ['EDGE-STATE']);
+
+  const food = checkStory({
+    description: 'As a diner, I want to filter restaurants by cuisine, so that I can skip food I dislike.\nAcceptance criteria:\n- Given I choose \'Everything but\' and pick Thai or Sushi, Then all restaurants but Thai or Sushi are listed.',
+  });
+  assert.deepEqual(rules(food), ['EDGE-STATE']);
+});
+
+test('EDGE-STATE exclusion form stays silent without a complement option name', () => {
+  const hours = checkStory({
+    description: 'As a diner, I want to see opening hours, so that I can plan my visit.\nAcceptance criteria:\n- Given I open a restaurant, Then I see opening hours for every day except Sunday and Monday.',
+  });
+  assert.ok(!rules(hours).includes('EDGE-STATE'));
+
+  const express = checkStory({
+    description: 'As a courier, I want to filter orders by speed, so that I can track the fast ones.\nAcceptance criteria:\n- When I choose "Express", I see all orders but Standard and Economy.',
+  });
+  assert.ok(!rules(express).includes('EDGE-STATE'));
+});
