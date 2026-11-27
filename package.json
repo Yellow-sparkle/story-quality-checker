@@ -1,0 +1,20 @@
+{
+  "name": "story-quality-checker",
+  "version": "0.1.0",
+  "description": "Rovo agent for Jira that flags gaps in user stories. The author decides what to change.",
+  "type": "module",
+  "main": "src/index.js",
+  "license": "UNLICENSED",
+  "private": true,
+  "scripts": {
+    "lint": "eslint src/**/* scripts/**/* test/**/*",
+    "test": "node --test test/*.test.js",
+    "golden": "node scripts/run-golden-set.js"
+  },
+  "devDependencies": {
+    "eslint": "^8.56.0"
+  },
+  "dependencies": {
+    "@forge/api": "^8.5.1"
+  }
+}
