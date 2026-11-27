@@ -311,3 +311,16 @@ test('EDGE-STATE exclusion form stays silent without a complement option name', 
   });
   assert.ok(!rules(express).includes('EDGE-STATE'));
 });
+
+// Rules 0.5.0 (Kate's decision, 27 Nov).
+test('a state word right after "by" (filter by status) does not fire EDGE-STATE', () => {
+  const byStatus = checkStory({
+    description: 'As a Kestrel Bank customer, I want to filter my payments by status, so that I see the ones that need action.\nAcceptance criteria:\n- When I choose "Pending", then only pending payments appear.',
+  });
+  assert.ok(!rules(byStatus).includes('EDGE-STATE'));
+
+  const change = checkStory({
+    description: 'As a PaceMate member, I want to change the status of my plan, so that I can pause it.\nAcceptance criteria:\n- Saving shows the new plan on my profile.',
+  });
+  assert.ok(rules(change).includes('EDGE-STATE'));
+});

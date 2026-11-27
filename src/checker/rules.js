@@ -181,7 +181,10 @@ export function checkEdgeState(parsed) {
   if (group) return [group];
 
   if (!parsed.story || !parsed.story.iWant) return []; // skip rather than guess (J4)
-  const hits = allMatches(stateRes, parsed.story.iWant);
+  // "filter/sort by status" names a field to group by, not a state change the
+  // story makes (decided 27 Nov, SQC-56), so a state word right after "by" is skipped.
+  const iWant = parsed.story.iWant;
+  const hits = allMatches(stateRes, iWant).filter((h) => !/\bby\s+$/i.test(iWant.slice(0, h.index)));
   if (hits.length === 0) return [];
 
   const acText = parsed.acLines.map((a) => a.text).join('\n');
